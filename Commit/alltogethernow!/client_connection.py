@@ -6,6 +6,7 @@ from threading import Thread
 class Client_Connection():
 
     def __init__(self):
+        pass
 
     def start_thread(self,trgt):
         pass

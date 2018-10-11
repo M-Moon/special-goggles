@@ -2,10 +2,12 @@
 
 import sys
 import tkinter as tk
+from client_connection import Client_Connection
 
 class Client(tk.Frame):
 
     def __init__(self, parent, width, height): # initialising application
+        #creating parent
         tk.Frame.__init__(self, parent)
         self.parent = parent
         parent.title("Client-side")
@@ -13,6 +15,7 @@ class Client(tk.Frame):
         self.user = "User"
         
         self.connected = False # connection identifier
+        self.cnct = Client_Connection # connector
         
         self.w = width
         self.h = height
@@ -63,7 +66,8 @@ class Client(tk.Frame):
         #checking if the box contained text, and then acting on that
         if len(input_get) > 0:
             Client.update_text(self, input_get) # adding the text to the chat window
-            #Client_Connection.send_message(input_get) # sending the message to the other client, through the server
+            if self.connected:
+                Client_Connection.send_message(self, input_get) # sending the message to the other client, through the server
 
     def update_text(self, text): # updating chat window
         self.messages.config(state='normal')
@@ -71,7 +75,7 @@ class Client(tk.Frame):
         self.input_user.set('')
         self.messages.see(tk.END)
 
-    def connection_window(self):
+    def connection_window(self): # window to connect to individual
         top = tk.Toplevel(self.parent)
         tk.Label(top,text="IP:").pack()
 
@@ -83,7 +87,7 @@ class Client(tk.Frame):
         b.pack(pady=5)
 
     def connect_to_server(self,ip):
-        pass
+        self.cnct.Connect(self,ip)
 
     def options(self):
         window = tk.Toplevel(self.parent)
@@ -125,7 +129,7 @@ class Client(tk.Frame):
 
         tk.Button(window,text="Enter",command=lambda:get_entries(self,window,e1)).grid(row=3,column=0)
 
-    def quit_prog():
+    def quit_prog(): # QUITTING
         sys.exit(0)
 
 root = tk.Tk()
