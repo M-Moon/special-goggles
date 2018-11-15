@@ -17,7 +17,7 @@ class Client(tk.Frame):
         self.user = "User"
         
         self.connected = False # connection identifier
-        self.cnct = Client_Connection(5625) # connector
+        self.cnct = Client_Connection(0) # connector
         
         self.w = width
         self.h = height
@@ -99,7 +99,7 @@ class Client(tk.Frame):
         except socket_error:
             pass
 
-    def options(self):
+    def options(self): # allow user to set options, such as name
         window = tk.Toplevel(self.parent)
 
         tk.Label(window,text="User").grid(row=0)

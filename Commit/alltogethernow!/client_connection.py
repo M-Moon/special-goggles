@@ -14,6 +14,9 @@ class Client_Connection():
         Thread(target=self.receive).start()
         #Thread(target=self.listen).start()
 
+    def stop_threads(self):
+        pass
+
     def connect(self, ip):
         self.s.connect((ip, self.port))
 
