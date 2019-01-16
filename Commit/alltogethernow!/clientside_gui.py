@@ -2,8 +2,14 @@
 
 import sys
 import tkinter as tk
+
 from client_connection import Client_Connection
+from encryptiondecryption import Encryptor, Decryptor, gen_keys
+
 from socket import error as socket_error
+
+from configparser import ConfigParser
+import os.path
 
 class Client(tk.Frame):
 
@@ -12,9 +18,8 @@ class Client(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.parent = parent
         parent.title("Client-side")
-        self.parent.protocol('WM_DELETE_WINDOW', False)
 
-        self.user = "User"
+        Client.get_config(self)
         
         self.connected = False # connection identifier
         self.cnct = Client_Connection(0) # connector
@@ -36,6 +41,8 @@ class Client(tk.Frame):
         return combined_func
 
     def toplevel_menu(self): # creation of the main window and its widgets
+        self.parent.resizable(False, False)
+        
         self.menubar = tk.Menu(self.parent)
 
         #adding menubar options "Connect", "Options", and "Quit"
@@ -52,12 +59,18 @@ class Client(tk.Frame):
         self.messages.config(state='disabled')
         self.messages.grid(row=0,column=0)
 
+        #actual scrollbar
+        scrollbar = tk.Scrollbar(self.parent, command=self.messages.yview)
+        scrollbar.grid(row=0, column=2, sticky="nsew", padx=2, pady=2)
+        self.messages['yscrollcommand'] = scrollbar.set
+
+        """
         #stupid joke scroll window and scrollbar
         scrollW = tk.Toplevel(self.parent)
         scrollW.protocol('WM_DELETE_WINDOW', False)
         scrollb = tk.Scrollbar(scrollW, command=self.messages.yview)
         scrollb.grid(sticky="nsew", padx=2, pady=2)
-        self.messages['yscrollcommand'] = scrollb.set
+        self.messages['yscrollcommand'] = scrollb.set"""
 
         #user input field for chat window
         self.input_user = tk.StringVar()
@@ -99,6 +112,32 @@ class Client(tk.Frame):
         except socket_error:
             pass
 
+    def get_config(self):
+        config = ConfigParser()
+        if os.path.isfile('config.ini'):
+            config.read('config.ini')
+
+            self.user = config['CONFIG']['user']
+            self.priv_key = config['CONFIG']['private_key']
+            self.pub_key = config['CONFIG']['public_key']
+        else:
+            self.priv_key, self.pub_key = gen_keys()
+            config['CONFIG'] = {'user': 'User',
+                                'private_key': self.priv_key,
+                                'public_key': self.pub_key}
+
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+            configfile.close()
+
+    def update_username_cfg(self):
+        config = ConfigParser()
+        config.read('config.ini')
+        config['CONFIG']['user'] = self.user
+        with open('config.ini', 'w') as configfile:
+            config.write(configfile)
+        configfile.close()
+
     def options(self): # allow user to set options, such as name
         window = tk.Toplevel(self.parent)
 
@@ -112,6 +151,8 @@ class Client(tk.Frame):
 
             if len(ent1) > 0:
                 self.user = ent1
+
+            Client.update_username_cfg(self)
 
             e1.delete(0,'end')
 

@@ -26,3 +26,8 @@ class Decryptor:
 
     def return_msg(self):
         return self.decrypted
+
+def gen_keys():
+    priv_key = 1
+    pub_key = 2
+    return priv_key, pub_key
