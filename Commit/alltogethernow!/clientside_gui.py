@@ -35,7 +35,7 @@ class Client(tk.Frame):
     def bind_events(self):
         self.enter_field.bind('<Return>', lambda event, a=self: Client.enter_pressed(a))
 
-    def combine_funcs(*funcs):
+    def combine_funcs(*funcs):  # function for combining functions
         def combined_func(*args, **kwargs):
             for f in funcs:
                 f(*args, **kwargs)
@@ -51,7 +51,7 @@ class Client(tk.Frame):
         self.menubar.add_command(label="Connect", command=lambda: Client.connection_window(self))
         self.menubar.add_command(label="Disconnect", command=lambda: self.cnct.disconnect())
         self.menubar.add_command(label="Options", command=lambda: Client.options(self))
-        self.menubar.add_command(label="Quit", command=Client.combine_funcs(self.parent.destroy, Client.quit_prog))
+        self.menubar.add_command(label="Quit", command= Client.combine_funcs(self.parent.destroy, Client.quit_prog))
 
         # default disconnect bar as disabled
         self.menubar.entryconfig(2, state="disabled")
@@ -75,11 +75,11 @@ class Client(tk.Frame):
         self.messages['yscrollcommand'] = scrollb.set"""
 
         # user input field for chat window
-        self.input_user = tk.StringVar()
+        self.input_user = tk.StringVar()  # make variable for text entry box
         self.enter_field = tk.Entry(self.parent, text=self.input_user)
-        self.enter_field.grid(row=20, column=0, sticky='W,E,S,N')
+        self.enter_field.grid(row=20, column=0, sticky='W,E,S,N')  # create entry field
 
-        self.parent.config(menu=self.menubar)
+        self.parent.config(menu=self.menubar)  # create menubar
 
     def enter_pressed(self):  # called if enter is pressed
         input_get = self.enter_field.get()  # getting input from enter box
@@ -92,40 +92,40 @@ class Client(tk.Frame):
                                                input_get)  # sending the message to the other client, through the server
 
     def update_text(self, text):  # updating chat window
-        self.messages.config(state='normal')
-        self.messages.insert('end', '{}: {}\n'.format(self.user, text))
-        self.input_user.set('')
-        self.messages.see(tk.END)
-        self.messages.config(state='disabled')
+        self.messages.config(state='normal')  # make text box configurable
+        self.messages.insert('end', '{}: {}\n'.format(self.user, text))  # insert message
+        self.input_user.set('')  # make entry text box blank
+        self.messages.see(tk.END)  # put message box at the end
+        self.messages.config(state='disabled')  # make text box unconfigurable
 
     def connection_window(self):  # window to connect to individual
         top = tk.Toplevel(self.parent)
-        tk.Label(top, text="IP:").pack()
+        tk.Label(top, text="IP:").pack()  # place to enter IP address
 
-        e = tk.Entry(top)
+        e = tk.Entry(top)  # entry box for IP
         e.pack(padx=5)
 
-        tk.Label(top, text="Port:").pack()
+        tk.Label(top, text="Port:").pack()  # place to enter port
 
-        e2 = tk.Entry(top)
-        e2.insert(0, 1501)
+        e2 = tk.Entry(top)  # entry box for port
+        e2.insert(0, 1501)  # defaulted at 1501 to make it easy
         e2.pack(padx=5)
 
         b = tk.Button(top, text="Enter", command=lambda: Client.combine_funcs(Client.establish_connection(self, e.get(), e2.get()),
                                                                               top.destroy()))
-        b.pack(pady=5)
+        b.pack(pady=5)  # create and pack confirmation button
 
-    def establish_connection(self, ip, port):
+    def establish_connection(self, ip, port):  # attempting to establish connection with other client
         try:
-            self.cnct.connect(ip, port)
-            self.menubar.entryconfig(2, state="normal")
-        except socket_error:
+            self.cnct.connect(ip, port)  # launching connection object
+            self.menubar.entryconfig(2, state="normal")  # make disconnect viable if connection established
+        except socket_error:  # if connection fails
             pass
 
-    def get_config(self):
+    def get_config(self):  # retrieving config from local files, creating one if it doesn't exist
         config = ConfigParser()
-        if os.path.isfile('config.ini'):
-            config.read('config.ini')
+        if os.path.isfile('config.ini'):  # checking file exists
+            config.read('config.ini')  # reading file
 
             self.user = config['CONFIG']['user']
             self.priv_key = config['CONFIG']['private_key']
@@ -140,13 +140,13 @@ class Client(tk.Frame):
                 config.write(configfile)
             configfile.close()
 
-    def update_cfg(self):
+    def update_cfg(self):  # updating the config after changes have been made
         config = ConfigParser()
         config.read('config.ini')
-        config['CONFIG']['user'] = self.user
-        config['CONFIG']['private_key'] = self.priv_key
-        config['CONFIG']['public_key'] = self.pub_key
-        with open('config.ini', 'w') as configfile:
+        config['CONFIG']['user'] = self.user  # username
+        config['CONFIG']['private_key'] = self.priv_key  # private key
+        config['CONFIG']['public_key'] = self.pub_key  # public key
+        with open('config.ini', 'w') as configfile:  # writing to file
             config.write(configfile)
         configfile.close()
 
@@ -158,21 +158,21 @@ class Client(tk.Frame):
         e1 = tk.Entry(window)
         e1.grid(row=0, column=1)
 
-        def get_entries(self, *args):
+        def get_entries(self, *args):  # get the entries the user has input
             ent1 = e1.get()
 
-            if len(ent1) > 0:
+            if len(ent1) > 0:  # making sure something has been input
                 self.user = ent1
 
             Client.update_cfg(self)
 
-            e1.delete(0, 'end')
+            e1.delete(0, 'end')  # deleting options window
 
             window.destroy()
 
         tk.Button(window, text="Enter", command=lambda: get_entries(self, window, e1)).grid(row=3, column=0)
 
-    def quit_prog(self):  # QUITTING
+    def quit_prog():  # QUITTING
         sys.exit(0)
 
 
