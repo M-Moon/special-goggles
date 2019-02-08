@@ -5,10 +5,9 @@ from threading import Thread
 
 class Client_Connection():
 
-    def __init__(self, port):
+    def __init__(self):
         self.ownip = socket.gethostbyname(socket.gethostname())
         self.s = socket.socket()
-        self.port = port
 
     def start_threads(self,trgt):
         Thread(target=self.receive).start()
@@ -17,8 +16,8 @@ class Client_Connection():
     def stop_threads(self):
         pass
 
-    def connect(self, ip):
-        self.s.connect((ip, self.port))
+    def connect(self, ip, port):
+        self.s.connect((ip, int(port)))
 
     def disconnect(self):
         self.s.close()
