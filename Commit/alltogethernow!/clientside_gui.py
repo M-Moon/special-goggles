@@ -83,18 +83,18 @@ class Client(tk.Frame):
 
     def enter_pressed(self):  # called if enter is pressed
         input_get = self.enter_field.get()  # getting input from enter box
+        self.input_user.set('')  # make entry text box blank
 
         # checking if the box contained text, and then acting on that
         if len(input_get) > 0:
-            Client.update_text(self, input_get)  # adding the text to the chat window
+            Client.update_text(self, self.user, input_get)  # adding the text to the chat window
             if self.connected:
                 Client_Connection.send_message(self,
-                                               input_get)  # sending the message to the other client, through the server
+                                               input_get)  # sending the message to the other client
 
-    def update_text(self, text):  # updating chat window
+    def update_text(self, name, text):  # updating chat window
         self.messages.config(state='normal')  # make text box configurable
-        self.messages.insert('end', '{}: {}\n'.format(self.user, text))  # insert message
-        self.input_user.set('')  # make entry text box blank
+        self.messages.insert('end', '{}: {}\n'.format(name, text))  # insert message
         self.messages.see(tk.END)  # put message box at the end
         self.messages.config(state='disabled')  # make text box unconfigurable
 

@@ -7,20 +7,25 @@ class Client_Connection():
 
     def __init__(self):
         self.ownip = socket.gethostbyname(socket.gethostname())
-        self.s = socket.socket()
+        self.connector = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        self.connector.settimeout(10)
+        self.listener.settimeout(10)
 
     def start_threads(self,trgt):
-        Thread(target=self.receive).start()
-        #Thread(target=self.listen).start()
+        listen_thread = Thread(target=Client_Connection.listen).start()
+        connect_thread = Thread(target=Client_Connection.connect).start()
 
     def stop_threads(self):
         pass
 
     def connect(self, ip, port):
-        self.s.connect((ip, int(port)))
+        self.connector.connect((ip, int(port)))
 
     def disconnect(self):
-        self.s.close()
+        self.connector.close()
+        self.listener.close()
 
     def receive(self):
         """ WE BE RECEIVIN' """
