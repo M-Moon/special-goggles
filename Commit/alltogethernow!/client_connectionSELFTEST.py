@@ -3,6 +3,8 @@
 import socket
 from threading import Thread
 
+localhst = "127.0.0.1"
+
 class Client_Connection():
 
     def __init__(self):

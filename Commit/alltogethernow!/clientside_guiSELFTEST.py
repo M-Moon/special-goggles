@@ -3,7 +3,7 @@
 import sys
 import tkinter as tk
 
-from client_connection import Client_Connection
+from client_connectionSELFTEST import Client_Connection
 from encryptiondecryption import Encryptor, Decryptor, gen_keys
 
 from socket import error as socket_error
