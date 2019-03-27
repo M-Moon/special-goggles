@@ -3,7 +3,7 @@
 import sys
 import tkinter as tk
 
-from client_connection import Client_Connection
+from client_connectionSELFTESTclient1 import Client_Connection
 from encryptiondecryption import Encryptor, Decryptor, gen_keys
 
 from socket import error as socket_error
@@ -23,6 +23,7 @@ class Client(tk.Frame):
         Client.get_config(self)
 
         self.connected = False  # connection identifier
+        self.cnct = Client_Connection()  # connector
 
         self.w = width
         self.h = height
@@ -48,7 +49,7 @@ class Client(tk.Frame):
 
         # adding menubar options "Connect", "Options", and "Quit"
         self.menubar.add_command(label="Connect", command=lambda: Client.connection_window(self))
-        self.menubar.add_command(label="Disconnect", command=lambda: Client.break_connection(self))
+        self.menubar.add_command(label="Disconnect", command=lambda: self.cnct.disconnect())
         self.menubar.add_command(label="Options", command=lambda: Client.options(self))
         self.menubar.add_command(label="Quit", command= Client.combine_funcs(self.parent.destroy, Client.quit_prog))
 
@@ -71,8 +72,7 @@ class Client(tk.Frame):
         scrollW.protocol('WM_DELETE_WINDOW', False)
         scrollb = tk.Scrollbar(scrollW, command=self.messages.yview)
         scrollb.grid(sticky="nsew", padx=2, pady=2)
-        self.messages['yscrollcommand'] = scrollb.set
-        """
+        self.messages['yscrollcommand'] = scrollb.set"""
 
         # user input field for chat window
         self.input_user = tk.StringVar()  # make variable for text entry box
@@ -89,8 +89,8 @@ class Client(tk.Frame):
         if len(input_get) > 0:
             Client.update_text(self, self.user, input_get)  # adding the text to the chat window
             if self.connected:
-                self.cnct.send_message(self,
-                                       input_get)  # sending the message to the other client
+                Client_Connection.send_message(self,
+                                               input_get)  # sending the message to the other client
 
     def update_text(self, name, text):  # updating chat window
         self.messages.config(state='normal')  # make text box configurable
@@ -117,16 +117,10 @@ class Client(tk.Frame):
 
     def establish_connection(self, ip, port):  # attempting to establish connection with other client
         try:
-            self.cnct = Client_Connection() # creating connection object
-            self.cnct.connect(ip, port)  # attempting connection with ip and port
-            self.connected = True
+            self.cnct.connect(ip, port)  # launching connection object
             self.menubar.entryconfig(2, state="normal")  # make disconnect viable if connection established
         except socket_error:  # if connection fails
-            print("Connection failed.")
-
-    def break_connection(self): # function to break connection
-        self.connected = False
-        self.cnct.disconnect()
+            pass
 
     def get_config(self):  # retrieving config from local files, creating one if it doesn't exist
         config = ConfigParser()
