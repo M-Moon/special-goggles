@@ -46,7 +46,7 @@ class Client(tk.Frame):
 
         self.menubar = tk.Menu(self.parent)
 
-        # adding menubar options "Connect", "Options", and "Quit"
+        # adding menubar options "Connect", "Disconnect, "Options", and "Quit"
         self.menubar.add_command(label="Connect", command=lambda: Client.connection_window(self))
         self.menubar.add_command(label="Disconnect", command=lambda: Client.break_connection(self))
         self.menubar.add_command(label="Options", command=lambda: Client.options(self))
@@ -117,9 +117,9 @@ class Client(tk.Frame):
 
     def establish_connection(self, ip, port):  # attempting to establish connection with other client
         try:
-            self.cnct = Client_Connection() # creating connection object
+            self.cnct = Client_Connection(self.priv_key, self.pub_key) # creating connection object
             self.cnct.connect(ip, port)  # attempting connection with ip and port
-            self.connected = True
+            self.connected = True # knowing connection is established
             self.menubar.entryconfig(2, state="normal")  # make disconnect viable if connection established
         except socket_error:  # if connection fails
             print("Connection failed.")
@@ -149,9 +149,11 @@ class Client(tk.Frame):
     def update_cfg(self):  # updating the config after changes have been made
         config = ConfigParser()
         config.read('config.ini')
+        
         config['CONFIG']['user'] = self.user  # username
         config['CONFIG']['private_key'] = self.priv_key  # private key
         config['CONFIG']['public_key'] = self.pub_key  # public key
+        
         with open('config.ini', 'w') as configfile:  # writing to file
             config.write(configfile)
         configfile.close()

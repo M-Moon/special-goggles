@@ -5,7 +5,7 @@ from threading import Thread
 
 class Client_Connection():
 
-    def __init__(self):
+    def __init__(self, priv_key, pub_key):
         self.ownip = socket.gethostbyname(socket.gethostname()) # getting own ip
     
         self.connector = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creating connector
@@ -27,11 +27,19 @@ class Client_Connection():
         pass
 
     def connect(self, ip, port): # starting the connection thread
-        self.connect_thread = Thread(target=Client_Connection.connect, args=(self, ip, port)).start()
+        self.connect_thread = Thread(target=Client_Connection._connect, args=(self, ip, port)).start()
 
     def _connect(self, ip, port): # connecting to client
         self.connector.connect((ip, int(port)))
         print("Connection established")
+
+        # sending keys
+        self.connector.send(self.priv_key.encode())
+        self.connector.send(self.pub_key.encode())
+
+        # receiving keys
+        self.other_priv_key = self.connector.recv(1024).decode()
+        self.other_pub_key = self.connector.recv(1024).decode()
 
     def disconnect(self):
         self.connector.close()
