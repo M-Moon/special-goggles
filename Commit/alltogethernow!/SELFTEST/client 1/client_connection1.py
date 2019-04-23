@@ -3,14 +3,11 @@
 import socket
 from threading import Thread
 
-from encryptiondecryption import encrypt_msg, decrypt_msg
-
 class Client_Connection():
 
-    def __init__(self, window, name, priv_key, pub_key):
+    def __init__(self, name, pub_key):
         self.ownip = socket.gethostbyname(socket.gethostname()) # getting own ip
 
-        self.priv_key = priv_key # this client's private key
         self.pub_key = pub_key # this client's public key
         self.name = name # this client's username
 
@@ -19,11 +16,18 @@ class Client_Connection():
 
         self.incoming_msg = None # variable for received messages
 
-    def connect(self, ip, port): # connecting to client
-        self.connector = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creating connector
-        self.connector.settimeout(10) # connector timeout to 10 seconds
+    def start_threads(self,trgt): # creating threads so client can both listen and connect
+        self.listen_thread = Thread(target=Client_Connection.listen).start()
 
-        Client_Connection.listen(self) # create listener
+    def stop_threads(self): # genocide the threads, might not be needed because could just destroy object
+        pass
+
+    def connect(self, ip, port): # starting the connection thread
+        self.connect_thread = Thread(target=Client_Connection._connect, args=(self, ip, port)).start()
+
+    def _connect(self, ip, port): # connecting to client
+        connector = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creating connector
+        connector.settimeout(10) # connector timeout to 10 seconds
 
         self.connector.connect((ip, int(port)))
         print("Connection established")
@@ -40,7 +44,7 @@ class Client_Connection():
         #receiving name
         self.other_name = self.connector.recv(1024).decode()
 
-    def disconnect(self): # disconnecting by closing both listener and connector objects
+    def disconnect(self):
         self.connector.close()
         self.listener.close()
 
@@ -57,21 +61,19 @@ class Client_Connection():
 
         while True:
             connection, address = listener.accept()
+            connection.send(self.pub_key.encode())
+
             while True:
                 try:
                     data = connection.recv(1024).decode() # receive data and decode
                     if not data:
                         continue
-                    #self.incoming_msg = decrypt_msg(self.priv_key, data)
-
-                    decrypted_msg = decrypt_msg(self.priv_key, data) # decrypt msg
-                    Client_Connection.relay_message(self, decrypted_msg) # relay to window
+                    self.incoming_msg = data
                 except Exception as e:
                     print(e)
 
-    def send_message(self, msg): # sending message to other client
-        encrypted_msg = encrypt_msg(self.other_pub_key, msg) # encrypt msg with received public key
-        self.connector.send(encrypted_msg.encode()) # send encrypted msg
+    def send_message(self, msg): # sending message to server to be relayed
+        pass
 
     def relay_message(self, msg): # relaying message to GUI part, returning msg
-      window.update_text(self.other_name, msg)
+        pass

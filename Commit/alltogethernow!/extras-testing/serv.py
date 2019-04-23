@@ -9,15 +9,17 @@ while True:
             connection, address = server.accept()
             print('Got connection from', address)
             connection.send('Welcome to the TCP listener'.encode())
-
+            
             while True:
-                data = server.recv(1024).decode()
-                if not data:
-                    continue
-                print(data)
+                try:
+                    data = connection.recv(1024).decode()
+                    if not data:
+                        continue
+                    print(data)
+                    connection.send(data.encode())
+                except ConnectionResetError as e:
+                    connection.close()
 
-                if not server.alive():
-                    connection.close
     except Exception as e:
         print(e)
         while True:

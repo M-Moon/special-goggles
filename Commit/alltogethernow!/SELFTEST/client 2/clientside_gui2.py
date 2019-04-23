@@ -3,8 +3,8 @@
 import sys
 import tkinter as tk
 
-from client_connection import Client_Connection
-from encryptiondecryption import gen_keys
+from client_connection2 import Client_Connection
+from encryptiondecryption2 import Encryptor, Decryptor, gen_keys
 
 from socket import error as socket_error
 
@@ -80,7 +80,6 @@ class Client(tk.Frame):
         self.input_user = tk.StringVar()  # make variable for text entry box
         self.enter_field = tk.Entry(self.parent, text=self.input_user)
         self.enter_field.grid(row=20, column=0, sticky='W,E,S,N')  # create entry field
-        self.enter_field.configure(state='readonly') # start the entry box as disabled until connection
 
         self.parent.config(menu=self.menubar)  # create menubar
 
@@ -101,15 +100,13 @@ class Client(tk.Frame):
         self.messages.see(tk.END)  # put message box at the end
         self.messages.config(state='disabled')  # make text box unconfigurable
 
-    """
-    def update_incoming_text(self): # checking to update text inside gui as opposed to in connection class
+    def update_incoming_text(self):
         while True:
             if Client_Connection(self, cnct):
-                if cnct.incoming_msg:
+                if cnct.incoming_msg :
                     if cnct.incoming_msg != None:
-                        Client.update_text(self, cnct.other_name, cnct.incoming_msg)
+                        Client_Connection.update_text(self, cnct.other_name, cnct.incoming_msg)
                         cnct.incoming_msg = None
-    """
 
     def connection_window(self):  # window to connect to individual
         top = tk.Toplevel(self.parent)
@@ -130,47 +127,36 @@ class Client(tk.Frame):
 
     def establish_connection(self, ip, port):  # attempting to establish connection with other client
         try:
-            self.cnct = Client_Connection(self.user, self, self.priv_key, self.pub_key) # creating connection object
+            self.cnct = Client_Connection(self.user, self.pub_key) # creating connection object
             self.cnct.connect(ip, port)  # attempting connection with ip and port
 
             self.connected = True # knowing connection is established
 
             self.menubar.entryconfig(2, state="normal")  # make disconnect viable if connection established
             self.menubar.entryconfig(3, state="disabled") # make options unviable
-
-            self.enter_field.configure(state='normal') # make entry box usable
         
-        except socket_error as e:  # if connection fails
+        except socket_error:  # if connection fails
             print("Connection failed.")
-            print(e)
 
     def break_connection(self): # function to break connection
-        self.cnct.disconnect() # call object's disconnect function
-
-        self.connected = False # show connection has been dropped
-
-        self.menubar.entryconfig(2, state="disabled")  # make disconnect unviable if connection established
-        self.menubar.entryconfig(3, state="normal") # make options viable
-
-        self.enter_field.configure(state='readonly') # make entry box unusable
+        self.connected = False
+        self.cnct.disconnect()
 
     def get_config(self):  # retrieving config from local files, creating one if it doesn't exist
         config = ConfigParser()
         if os.path.isfile('config.ini'):  # checking file exists
             config.read('config.ini')  # reading file
-            
-            # getting username, private key, and public key from config
+
             self.user = config['CONFIG']['user']
             self.priv_key = config['CONFIG']['private_key']
             self.pub_key = config['CONFIG']['public_key']
-
-        else: # if no config file exists, create one
-            self.priv_key, self.pub_key = gen_keys() # generating keys
+        else:
+            self.priv_key, self.pub_key = gen_keys()
             config['CONFIG'] = {'user': 'User',
                                 'private_key': self.priv_key,
                                 'public_key': self.pub_key}
 
-            with open('config.ini', 'w') as configfile: # writing to config
+            with open('config.ini', 'w') as configfile:
                 config.write(configfile)
             configfile.close()
 
