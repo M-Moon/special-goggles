@@ -33,6 +33,8 @@ class Client(tk.Frame):
 
         Client.bind_events(self)  # event binding, such as <enter_pressed>
 
+        update_incoming_msg_thread = Thread(target=Client.handle_incoming_msg, args=(self,)).start() # thread to handle received message updating
+
     def bind_events(self):
         self.enter_field.bind('<Return>', lambda event, a=self: Client.enter_pressed(a))
 
@@ -101,16 +103,17 @@ class Client(tk.Frame):
         self.messages.see(tk.END)  # put message box at the end
         self.messages.config(state='disabled')  # make text box unconfigurable
 
-    """
-    def update_incoming_text(self): # checking to update text inside gui as opposed to in connection class
+    def handle_incoming_msg(self): # checking to update text inside gui as opposed to in connection class
         while True:
-            if Client_Connection(self, cnct):
-                if cnct.incoming_msg:
-                    if cnct.incoming_msg != None:
-                        Client.update_text(self, cnct.other_name, cnct.incoming_msg)
-                        cnct.incoming_msg = None
-    """
-
+            try:
+                if hasattr(Client, 'cnct'):
+                    if self.cnct.incoming_msg:
+                        if self.cnct.incoming_msg != None:
+                            Client.update_text(self, cnct.other_name, cnct.incoming_msg)
+                            self.cnct.incoming_msg = None
+            except AttributeError:
+                continue
+    
     def connection_window(self):  # window to connect to individual
         top = tk.Toplevel(self.parent)
         tk.Label(top, text="IP:").pack()  # place to enter IP address
@@ -130,7 +133,7 @@ class Client(tk.Frame):
 
     def establish_connection(self, ip, port):  # attempting to establish connection with other client
         try:
-            self.cnct = Client_Connection(self.user, self, self.priv_key, self.pub_key) # creating connection object
+            self.cnct = Client_Connection(self.user, self.priv_key, self.pub_key) # creating connection object
             self.cnct.connect(ip, port)  # attempting connection with ip and port
 
             self.connected = True # knowing connection is established
