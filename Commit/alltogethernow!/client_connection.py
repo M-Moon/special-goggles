@@ -41,7 +41,7 @@ class Client_Connection():
 
         print("Connection established") # confirm connection established
 
-    def disconnect(self): # disconnecting by closing both listener and connector objects
+    def disconnect(self): # disconnecting by closing both connector and listener sockets
         self.connector.close()
         self.listener.close()
 
@@ -63,7 +63,7 @@ class Client_Connection():
                     data = connection.recv(1024).decode() # receive data and decode
                     if not data:
                         continue
-                    self.incoming_msg = decrypt_msg(self.priv_key, data)
+                    self.incoming_msg = decrypt_msg(self.priv_key, data) # decrypting incoming message
                     
                     #decrypted_msg = decrypt_msg(self.priv_key, data) # decrypt msg
                     #Client_Connection.relay_message(self, decrypted_msg) # relay to window
