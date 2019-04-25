@@ -1,33 +1,17 @@
 """ Self-made encryption algorithm for the message app """
 
-class Encryptor:
+def encrypt_msg(pub_key, msg):
+    enc_msg = msg
+    ### algorithm to encrypt message with other user's public key
+    return enc_msg
 
-    def __init__(self, pub_key):
-        self.pub_key = pub_key
-        self.encrypted = ""
-
-    def encrypt(self, msg):
-        pass
-        #self.encrypted = enc_msg
-
-    def return_msg(self):
-        return self.encrypted
-
-
-class Decryptor:
-
-    def __init__(self, priv_key):
-        self.priv_key = priv_key
-        self.decrypted = ""
-
-    def decrypt(self, msg):
-        pass
-        #self.decrypted = dec_msg
-
-    def return_msg(self):
-        return self.decrypted
+def decrypt_msg(priv_key, msg):
+    dec_msg = msg
+    ### algorithm to decrypt message with own private key
+    return dec_msg
 
 def gen_keys():
+    ### algorithm to generate keys and shit
     priv_key = 1
     pub_key = 2
     return priv_key, pub_key
