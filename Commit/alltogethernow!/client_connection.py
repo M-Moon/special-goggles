@@ -23,7 +23,8 @@ class Client_Connection():
         self.connector = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creating connector
         self.connector.settimeout(10) # connector timeout to 10 seconds
 
-        Client_Connection.listen(self) # create listener
+        if not hasattr(Client_Connection, "listen_thread"):
+            Client_Connection.listen(self) # create listener
 
         self.connector.connect((ip, int(port))) # connect function
 
@@ -44,6 +45,7 @@ class Client_Connection():
     def disconnect(self): # disconnecting by closing both connector and listener sockets
         self.connector.close()
         self.listener.close()
+        del self.listen_thread
 
     def listen(self): # starting the listening thread
         self.listen_thread = Thread(target=Client_Connection._listen, args=(self,)).start()
@@ -68,7 +70,7 @@ class Client_Connection():
                     #decrypted_msg = decrypt_msg(self.priv_key, data) # decrypt msg
                     #Client_Connection.relay_message(self, decrypted_msg) # relay to window
                 except Exception as e:
-                    print(e)
+                    print(e, "Yes this one right here officer")
 
     def send_message(self, msg): # sending message to other client
         encrypted_msg = encrypt_msg(self.other_pub_key, msg) # encrypt msg with received public key

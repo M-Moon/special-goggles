@@ -92,20 +92,16 @@ def generate_large_prime(k):
 ### actual functions below ###
 
 def generate_keypair(): # generating the keypairs
-   p = generate_large_prime(32)
-   q = generate_large_prime(32)
+   p = generate_large_prime(8)
+   q = generate_large_prime(8)
 
    while not (isinstance(p, int) and isinstance(q, int)): # if generation has failed
-      p = generate_large_prime(32)
-      q = generate_large_prime(32)
+      p = generate_large_prime(8)
+      q = generate_large_prime(8)
       x = 1
-      if x == 1:
-         #print(p)
-         #print(q)
-         x += 1
    
       while p == q: # cannot use the two same primes
-        q = generate_large_prime(32)
+        q = generate_large_prime(8)
 
    # n = pq
    n = p * q
@@ -149,11 +145,11 @@ def decrypt(pk, ciphertext):
 
 pub_key, priv_key = generate_keypair()
 
-print(pub_key, priv_key)
+#print(pub_key, priv_key)
 
 encrypted = encrypt(priv_key, "Hello there me old chum")
 
-print(encrypted)
+print(''.join(map(lambda x: str(x), encrypted)))
 print("-"*64)
 
 decrypted = decrypt(pub_key, encrypted)

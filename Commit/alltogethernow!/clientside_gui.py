@@ -82,7 +82,7 @@ class Client(tk.Frame):
         self.input_user = tk.StringVar()  # make variable for text entry box
         self.enter_field = tk.Entry(self.parent, text=self.input_user)
         self.enter_field.grid(row=20, column=0, sticky='W,E,S,N')  # create entry field
-        self.enter_field.configure(state='readonly') # start the entry box as disabled until connection
+        #self.enter_field.configure(state='readonly') # start the entry box as disabled until connection
 
         self.parent.config(menu=self.menubar)  # create menubar
 
