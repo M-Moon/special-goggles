@@ -7,7 +7,7 @@ def encrypt_msg(pub_key, msg):
     # Unpack the key into it's components
     key, n = pub_key
     # Convert each letter in the plaintext to numbers based on the character using a^b mod m
-    cipher = [(ord(char) ** key) % n for char in msg]
+    cipher = [pow(ord(char), key, n) for char in msg]
     # Return the array of bytes
     return cipher
 
@@ -15,7 +15,7 @@ def decrypt_msg(priv_key, ciphertext):
     # Unpack the key into its components
     key, n = priv_key
     # Generate the plaintext based on the ciphertext and key using a^b mod m
-    plain = [chr((char ** key) % n) for char in ciphertext]
+    plain = [chr(pow(char, key, n)) for char in ciphertext]
     # Return the array of bytes as a string
     return ''.join(plain)
 
@@ -92,16 +92,16 @@ def is_prime(n): # checking if number is prime
    return False
 
 def generate_keypair(): # generating the keypairs
-    p = generate_large_prime(8)
-    q = generate_large_prime(8)
+    p = generate_large_prime(64)
+    q = generate_large_prime(64)
 
     while not (isinstance(p, int) and isinstance(q, int)): # if generation has failed
-      p = generate_large_prime(8)
-      q = generate_large_prime(8)
+      p = generate_large_prime(64)
+      q = generate_large_prime(64)
       x = 1
 
       while p == q: # cannot use the two same primes
-        q = generate_large_prime(8)
+        q = generate_large_prime(64)
     
     # n = pq
     n = p * q

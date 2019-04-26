@@ -1,0 +1,3 @@
+https://stackoverflow.com/questions/26681374/rsa-decryption-with-large-keys/26681810
+
+Using large keys requires the use of the 'pow' function as the function uses 'exponentiation by squaring' to efficiently compute the large powers

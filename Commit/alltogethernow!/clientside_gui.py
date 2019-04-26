@@ -46,9 +46,9 @@ class Client(tk.Frame):
         return combined_func
 
     def toplevel_menu(self):  # creation of the main window and its widgets
-        self.parent.resizable(False, False)
+        self.parent.resizable(False, False) # stop the window being resized
 
-        self.menubar = tk.Menu(self.parent)
+        self.menubar = tk.Menu(self.parent) # create menubar object
 
         # adding menubar options "Connect", "Disconnect, "Options", and "Quit"
         self.menubar.add_command(label="Connect", command=lambda: Client.connection_window(self))
@@ -84,7 +84,7 @@ class Client(tk.Frame):
         self.enter_field.grid(row=20, column=0, sticky='W,E,S,N')  # create entry field
         #self.enter_field.configure(state='readonly') # start the entry box as disabled until connection
 
-        self.parent.config(menu=self.menubar)  # create menubar
+        self.parent.config(menu=self.menubar)  # place menubar on window
 
     def enter_pressed(self):  # called if enter is pressed
         input_get = self.enter_field.get()  # getting input from enter box
