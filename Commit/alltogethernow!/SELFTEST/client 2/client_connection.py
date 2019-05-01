@@ -27,7 +27,7 @@ class Client_Connection():
 
         try: # seeing if listen_thread exists (From previous connection)
             if self.listen_thread:
-                print("It exists")
+                pass
         except:
             Client_Connection.listen(self) # create listener
 
@@ -35,55 +35,52 @@ class Client_Connection():
 
         # sending key
         self.connector.send(str(self.pub_key).encode('UTF-8'))
-        #print("Sent pub key")
 
-        #sending name
+        # sending name
         self.connector.send(self.name.encode('UTF-8'))
-        #print("Sent name")
 
         print("Connection established") # confirm connection established
 
     def disconnect(self): # disconnecting by closing both connector and listener sockets
-        self.connector.close()
-        #self.listener.close()
-        del self.listen_thread
+        self.connector.close() # close connector socket
+        
+        self.listener.close() # close listener socket
+        self.connection.close() # close other client connected socket
+        #print("Deleted??")
 
     def listen(self): # starting the listening thread
         self.listen_thread = Thread(target=Client_Connection._listen, args=(self,)).start()
-        print("Yes")
 
     def _listen(self):
-        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creating listener
-        listener.settimeout(10) # listener timeout to 10 seconds
+        self.listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creating listener
+        self.listener.settimeout(10) # listener timeout to 10 seconds
 
         #listener.bind((self.ownip, 4030)) # bind to own ip and arbitrary port
-        listener.bind(('127.0.0.1', 4030))
-        listener.listen(1) # listen for one connection
+        self.listener.bind(('127.0.0.1', 4030))
+        self.listener.listen(1) # listen for one connection, reject all others if connected
 
         while True:
-            connection, address = listener.accept() # accept incoming connection
+            self.connection, address = self.listener.accept() # accept incoming connection
 
             # receiving key
-            self.other_pub_key = literal_eval(connection.recv(1024).decode())
+            self.other_pub_key = literal_eval(self.connection.recv(1024).decode())
             #print(self.other_pub_key)
 
             #receiving name
-            self.other_name = connection.recv(1024).decode()
+            self.other_name = self.connection.recv(1024).decode()
             #print(self.other_name)
             
             while True:
                 try:
-                    data = literal_eval(connection.recv(1024).decode()) # receive data and decode, then eval the string to list
+                    data = literal_eval(self.connection.recv(1024).decode()) # receive data and decode, then eval the string to list
                     #print(data)
                     if not data:
                         continue
                     self.incoming_msg = decrypt_msg(self.priv_key, data) # decrypting incoming message
-                    #print(self.incoming_msg)
-                    
-                    #decrypted_msg = decrypt_msg(self.priv_key, data) # decrypt msg
-                    #Client_Connection.relay_message(self, decrypted_msg) # relay to window
+                    #print(self.incoming_msg)  
                 except Exception as e:
-                    print(e, "Yes this one right here officer")
+                    #print(e, "Yes this one right here officer")
+                    pass
 
     def send_message(self, msg): # sending message to other client
         encrypted_msg = encrypt_msg(self.other_pub_key, msg) # encrypt msg with received public key

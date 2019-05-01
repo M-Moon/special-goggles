@@ -139,6 +139,15 @@ class Client(tk.Frame):
 
             self.connected = True # knowing connection is established
 
+            # confirming connection in textbox
+            self.messages.config(state='normal')  # make text box configurable
+            self.messages.insert('end', "\n")
+            self.messages.insert('end', "Connection established with {} on port {}\n".format(ip, port))  # insert message
+            self.messages.insert('end', "\n")
+            self.messages.see(tk.END)  # put message box at the end
+            self.messages.config(state='disabled')  # make text box unconfigurable
+
+
             self.menubar.entryconfig(1, state="disabled") # make connect unviable
             self.menubar.entryconfig(2, state="normal")  # make disconnect viable if connection established
             self.menubar.entryconfig(3, state="disabled") # make options unviable

@@ -139,6 +139,7 @@ class Client(tk.Frame):
 
             self.connected = True # knowing connection is established
 
+            self.menubar.entryconfig(1, state="disabled") # make connect unviable
             self.menubar.entryconfig(2, state="normal")  # make disconnect viable if connection established
             self.menubar.entryconfig(3, state="disabled") # make options unviable
 
@@ -153,10 +154,12 @@ class Client(tk.Frame):
 
         self.connected = False # show connection has been dropped
 
+        self.menubar.entryconfig(1, state="normal") # make connect unviable
         self.menubar.entryconfig(2, state="disabled")  # make disconnect unviable if connection established
         self.menubar.entryconfig(3, state="normal") # make options viable
 
         self.enter_field.configure(state='readonly') # make entry box unusable
+        #print("Passed")
 
     def get_config(self):  # retrieving config from local files, creating one if it doesn't exist
         config = ConfigParser()

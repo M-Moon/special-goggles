@@ -50,7 +50,7 @@ def miller_rabin(n):
              return False
      return True
 
-   for i in range(64):# number of trials 
+   for i in range(64): # number of trials 
      a = random.randrange(2, n)
      if trial_composite(a):
          return False
