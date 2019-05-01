@@ -3,6 +3,10 @@
 import random
 import math
 
+KEY_SIZE = 128
+
+### encryption and decryption functions ###
+
 def encrypt_msg(pub_key, msg):
     # Unpack the key into it's components
     key, n = pub_key
@@ -46,7 +50,7 @@ def miller_rabin(n):
              return False
      return True
 
-   for i in range(64):#number of trials 
+   for i in range(64):# number of trials 
      a = random.randrange(2, n)
      if trial_composite(a):
          return False
@@ -91,17 +95,28 @@ def is_prime(n): # checking if number is prime
          return miller_rabin(n)
    return False
 
+def generate_large_prime(k): # generating large prime numbers
+   # k is the desired bit length
+   r=100*(math.log(k,2)+1) # number of attempts max
+   r_ = r
+   while r>0:
+      n = random.randrange(2**(k-1),2**(k))
+      r-=1
+      if is_prime(n) == True:
+          return n
+   return "Failed"
+
 def generate_keypair(): # generating the keypairs
-    p = generate_large_prime(64)
-    q = generate_large_prime(64)
+    p = generate_large_prime(KEY_SIZE)
+    q = generate_large_prime(KEY_SIZE)
 
     while not (isinstance(p, int) and isinstance(q, int)): # if generation has failed
-      p = generate_large_prime(64)
-      q = generate_large_prime(64)
+      p = generate_large_prime(KEY_SIZE)
+      q = generate_large_prime(KEY_SIZE)
       x = 1
 
       while p == q: # cannot use the two same primes
-        q = generate_large_prime(64)
+        q = generate_large_prime(KEY_SIZE)
     
     # n = pq
     n = p * q
@@ -126,17 +141,6 @@ def generate_keypair(): # generating the keypairs
     # Return public and private keypair
     # Public key is (e, n) and private key is (d, n)
     return ((e, n), (d, n))
-
-def generate_large_prime(k): # generating large prime numbers
-   # k is the desired bit length
-   r=100*(math.log(k,2)+1) # number of attempts max
-   r_ = r
-   while r>0:
-      n = random.randrange(2**(k-1),2**(k))
-      r-=1
-      if is_prime(n) == True:
-          return n
-   return "Failed"
 
 def gen_keys(): # driver for generating keys
     ### algorithm to generate keys and shit

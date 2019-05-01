@@ -13,6 +13,8 @@ from threading import Thread
 from configparser import ConfigParser
 import os.path
 
+from ast import literal_eval
+
 
 class Client(tk.Frame):
 
@@ -46,9 +48,9 @@ class Client(tk.Frame):
         return combined_func
 
     def toplevel_menu(self):  # creation of the main window and its widgets
-        self.parent.resizable(False, False)
+        self.parent.resizable(False, False) # stop the window being resized
 
-        self.menubar = tk.Menu(self.parent)
+        self.menubar = tk.Menu(self.parent) # create menubar object
 
         # adding menubar options "Connect", "Disconnect, "Options", and "Quit"
         self.menubar.add_command(label="Connect", command=lambda: Client.connection_window(self))
@@ -82,9 +84,9 @@ class Client(tk.Frame):
         self.input_user = tk.StringVar()  # make variable for text entry box
         self.enter_field = tk.Entry(self.parent, text=self.input_user)
         self.enter_field.grid(row=20, column=0, sticky='W,E,S,N')  # create entry field
-        self.enter_field.configure(state='readonly') # start the entry box as disabled until connection
+        #self.enter_field.configure(state='readonly') # start the entry box as disabled until connection
 
-        self.parent.config(menu=self.menubar)  # create menubar
+        self.parent.config(menu=self.menubar)  # place menubar on window
 
     def enter_pressed(self):  # called if enter is pressed
         input_get = self.enter_field.get()  # getting input from enter box
@@ -94,8 +96,7 @@ class Client(tk.Frame):
         if len(input_get) > 0:
             Client.update_text(self, self.user, input_get)  # adding the text to the chat window
             if self.connected:
-                self.cnct.send_message(self,
-                                       input_get)  # sending the message to the other client
+                self.cnct.send_message(input_get)  # sending the message to the other client
 
     def update_text(self, name, text):  # updating chat window
         self.messages.config(state='normal')  # make text box configurable
@@ -106,10 +107,10 @@ class Client(tk.Frame):
     def handle_incoming_msg(self): # checking to update text inside gui as opposed to in connection class
         while True:
             try:
-                if hasattr(Client, 'cnct'):
+                if self.cnct:
                     if self.cnct.incoming_msg:
                         if self.cnct.incoming_msg != None:
-                            Client.update_text(self, cnct.other_name, cnct.incoming_msg)
+                            Client.update_text(self, self.cnct.other_name, self.cnct.incoming_msg)
                             self.cnct.incoming_msg = None
             except AttributeError:
                 continue
@@ -164,16 +165,16 @@ class Client(tk.Frame):
             
             # getting username, private key, and public key from config
             self.user = config['CONFIG']['user']
-            self.priv_key = config['CONFIG']['private_key']
-            self.pub_key = config['CONFIG']['public_key']
+            self.priv_key = literal_eval(config['CONFIG']['private_key']) # getting private key as tuple
+            self.pub_key = literal_eval(config['CONFIG']['public_key']) # getting public key as tuple
 
         else: # if no config file exists, create one
             self.priv_key, self.pub_key = gen_keys() # generating keys
             config['CONFIG'] = {'user': 'User',
-                                'private_key': self.priv_key,
-                                'public_key': self.pub_key}
+                                'private_key': str(self.priv_key),
+                                'public_key': str(self.pub_key)}
 
-            self.user = 'User'
+            self.user = "User"
 
             with open('config.ini', 'w') as configfile: # writing to config
                 config.write(configfile)
@@ -184,8 +185,8 @@ class Client(tk.Frame):
         config.read('config.ini')
         
         config['CONFIG']['user'] = self.user  # username
-        config['CONFIG']['private_key'] = self.priv_key  # private key
-        config['CONFIG']['public_key'] = self.pub_key  # public key
+        config['CONFIG']['private_key'] = str(self.priv_key)  # private key
+        config['CONFIG']['public_key'] = str(self.pub_key)  # public key
         
         with open('config.ini', 'w') as configfile:  # writing to file
             config.write(configfile)

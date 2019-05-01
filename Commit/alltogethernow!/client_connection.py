@@ -5,6 +5,8 @@ from threading import Thread
 
 from encryptiondecryption import encrypt_msg, decrypt_msg
 
+from ast import literal_eval
+
 class Client_Connection():
 
     def __init__(self, name, priv_key, pub_key):
@@ -23,58 +25,66 @@ class Client_Connection():
         self.connector = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creating connector
         self.connector.settimeout(10) # connector timeout to 10 seconds
 
-        if not hasattr(Client_Connection, "listen_thread"):
+        try: # seeing if listen_thread exists (From previous connection)
+            if self.listen_thread:
+                pass
+        except:
             Client_Connection.listen(self) # create listener
 
         self.connector.connect((ip, int(port))) # connect function
 
         # sending key
-        self.connector.send(self.pub_key.encode())
+        self.connector.send(str(self.pub_key).encode('UTF-8'))
 
-        # receiving key
-        self.other_pub_key = self.connector.recv(1024).decode()
-
-        #sending name
-        self.connector.send(self.name.encode())
-
-        #receiving name
-        self.other_name = self.connector.recv(1024).decode()
+        # sending name
+        self.connector.send(self.name.encode('UTF-8'))
 
         print("Connection established") # confirm connection established
 
     def disconnect(self): # disconnecting by closing both connector and listener sockets
-        self.connector.close()
-        self.listener.close()
-        del self.listen_thread
+        self.connector.close() # close connector socket
+        
+        self.listener.close() # close listener socket
+        self.connection.close() # close other client connected socket
+        #print("Deleted??")
 
     def listen(self): # starting the listening thread
         self.listen_thread = Thread(target=Client_Connection._listen, args=(self,)).start()
 
     def _listen(self):
-        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creating listener
-        listener.settimeout(10) # listener timeout to 10 seconds
+        self.listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creating listener
+        self.listener.settimeout(10) # listener timeout to 10 seconds
 
         #listener.bind((self.ownip, 4030)) # bind to own ip and arbitrary port
-        listener.bind(('127.0.0.1', 4030))
-        listener.listen(1) # listen for one connection
+        self.listener.bind(('127.0.0.1', 4030))
+        self.listener.listen(1) # listen for one connection, reject all others if connected
 
         while True:
-            connection, address = listener.accept() # accept incoming connection
+            self.connection, address = self.listener.accept() # accept incoming connection
+
+            # receiving key
+            self.other_pub_key = literal_eval(self.connection.recv(1024).decode())
+            #print(self.other_pub_key)
+
+            #receiving name
+            self.other_name = self.connection.recv(1024).decode()
+            #print(self.other_name)
+            
             while True:
                 try:
-                    data = connection.recv(1024).decode() # receive data and decode
+                    data = literal_eval(self.connection.recv(1024).decode()) # receive data and decode, then eval the string to list
+                    #print(data)
                     if not data:
                         continue
                     self.incoming_msg = decrypt_msg(self.priv_key, data) # decrypting incoming message
-                    
-                    #decrypted_msg = decrypt_msg(self.priv_key, data) # decrypt msg
-                    #Client_Connection.relay_message(self, decrypted_msg) # relay to window
+                    #print(self.incoming_msg)  
                 except Exception as e:
-                    print(e, "Yes this one right here officer")
+                    #print(e, "Yes this one right here officer")
+                    pass
 
     def send_message(self, msg): # sending message to other client
         encrypted_msg = encrypt_msg(self.other_pub_key, msg) # encrypt msg with received public key
-        self.connector.send(encrypted_msg.encode()) # send encrypted msg
+        self.connector.send(str(encrypted_msg).encode('UTF-8')) # send encrypted msg as string (Cannot send lists easily)
 
     #def relay_message(self, msg): # relaying message to GUI part, returning msg
       #self.window.update_text(self.other_name, msg)
