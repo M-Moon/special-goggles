@@ -3,7 +3,7 @@
 import random
 import math
 
-KEY_SIZE = 128
+KEY_SIZE = 256
 
 ### encryption and decryption functions ###
 
@@ -57,6 +57,7 @@ def miller_rabin(n):
    return True
 
 def multiplicative_inverse(e, phi): # finding the multiplicative inverse of two numbers
+
    def extended_gcd(k, j):
       last_remainder, remainder = abs(k), abs(j)
       x, lastx, y, lasty = 0, 1, 1, 0
@@ -117,6 +118,9 @@ def generate_keypair(): # generating the keypairs
 
       while p == q: # cannot use the two same primes
         q = generate_large_prime(KEY_SIZE)
+
+    #print(p)
+    #print(q)
     
     # n = pq
     n = p * q
@@ -148,19 +152,18 @@ def gen_keys(): # driver for generating keys
 
 ### testing ###
 
-"""
+
 pub_key, priv_key = generate_keypair()
 
-print(pub_key)
-print(priv_key)
+#print(pub_key)
+#print(priv_key)
 
 enc = encrypt_msg(pub_key, "The man that comes is the man who's dumb")
 
 print()
-print(enc)
+#print(enc)
 print()
 
 dec = decrypt_msg(priv_key, enc)
 
 print(dec)
-"""

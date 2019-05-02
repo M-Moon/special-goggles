@@ -7,6 +7,8 @@ from encryptiondecryption import encrypt_msg, decrypt_msg
 
 from ast import literal_eval
 
+DATA_BUFFER = 4096
+
 class Client_Connection():
 
     def __init__(self, name, priv_key, pub_key):
@@ -63,16 +65,16 @@ class Client_Connection():
             self.connection, address = self.listener.accept() # accept incoming connection
 
             # receiving key
-            self.other_pub_key = literal_eval(self.connection.recv(1000024).decode())
+            self.other_pub_key = literal_eval(self.connection.recv(DATA_BUFFER).decode())
             #print(self.other_pub_key)
 
             #receiving name
-            self.other_name = self.connection.recv(1000024).decode()
+            self.other_name = self.connection.recv(DATA_BUFFER).decode()
             #print(self.other_name)
             
             while True:
                 try:
-                    data = literal_eval(self.connection.recv(1000024).decode()) # receive data and decode, then eval the string to list
+                    data = literal_eval(self.connection.recv(DATA_BUFFER).decode()) # receive data and decode, then eval the string to list
                     #print(data)
                     if not data:
                         continue
