@@ -31,7 +31,7 @@ class Client_Connection():
             if self.listen_thread:
                 pass
         except:
-            Client_Connection.listen(self) # create listener
+            Client_Connection.listen(self, port) # create listener
 
         self.connector.connect((ip, int(port))) # connect function
 
@@ -50,15 +50,15 @@ class Client_Connection():
         self.connection.close() # close other client connected socket
         #print("Deleted??")
 
-    def listen(self): # starting the listening thread
-        self.listen_thread = Thread(target=Client_Connection._listen, args=(self,)).start()
+    def listen(self, port): # starting the listening thread
+        self.listen_thread = Thread(target=Client_Connection._listen, args=(self,port)).start()
 
-    def _listen(self):
+    def _listen(self, port):
         self.listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creating listener
         self.listener.settimeout(10) # listener timeout to 10 seconds
 
-        #listener.bind((self.ownip, 4030)) # bind to own ip and arbitrary port
-        self.listener.bind(('127.0.0.1', 4030))
+        #listener.bind((self.ownip, int(port))) # bind to own ip and same port as connection
+        self.listener.bind(('127.0.0.1', int(port)))
         self.listener.listen(1) # listen for one connection, reject all others if connected
 
         while True:

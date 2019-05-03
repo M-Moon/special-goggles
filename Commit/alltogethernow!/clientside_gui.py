@@ -100,8 +100,20 @@ class Client(tk.Frame):
 
     def update_text(self, name, text):  # updating chat window
         self.messages.config(state='normal')  # make text box configurable
+        
         self.messages.insert('end', '{}: {}\n'.format(name, text))  # insert message
+
         self.messages.see(tk.END)  # put message box at the end
+        
+        self.messages.config(state='disabled')  # make text box unconfigurable
+
+    def update_text_other(self, text):
+        self.messages.config(state='normal')  # make text box configurable
+        
+        self.messages.insert('end', "\n{}\n".format(text))  # insert message
+        
+        self.messages.see(tk.END)  # put message box at the end
+        
         self.messages.config(state='disabled')  # make text box unconfigurable
 
     def handle_incoming_msg(self): # checking to update text inside gui as opposed to in connection class
@@ -140,13 +152,7 @@ class Client(tk.Frame):
             self.connected = True # knowing connection is established
 
             # confirming connection in textbox
-            self.messages.config(state='normal')  # make text box configurable
-            self.messages.insert('end', "\n")
-            self.messages.insert('end', "Connection established with {} on port {}\n".format(ip, port))  # insert message
-            self.messages.insert('end', "\n")
-            self.messages.see(tk.END)  # put message box at the end
-            self.messages.config(state='disabled')  # make text box unconfigurable
-
+            Client.update_text_other(self, "Connection established with {} on port {}\n".format(ip, port))
 
             self.menubar.entryconfig(1, state="disabled") # make connect unviable
             self.menubar.entryconfig(2, state="normal")  # make disconnect viable if connection established
@@ -192,6 +198,12 @@ class Client(tk.Frame):
                 config.write(configfile)
             configfile.close()
 
+    def generate_new_keys(self):
+        self.priv_key, self.pub_key = gen_keys() # generating new keys
+        Client.update_cfg(self) # updating config to apply new keys
+
+        Client.update_text_other(self, "Generated new keys")
+
     def update_cfg(self):  # updating the config after changes have been made
         config = ConfigParser()
         config.read('config.ini')
@@ -224,7 +236,9 @@ class Client(tk.Frame):
 
             window.destroy()
 
-        tk.Button(window, text="Enter", command=lambda: get_entries(self, window, e1)).grid(row=3, column=0)
+        tk.Button(window, text="Confirm", command=lambda: get_entries(self, window, e1)).grid(row=3, column=0) # button to get username update
+
+        tk.Button(window, text="Generate New Keys", command=lambda: Client.generate_new_keys(self)).grid(row=4, column=0) # button to generate new keys
 
     def quit_prog():  # QUITTING
         sys.exit(0)

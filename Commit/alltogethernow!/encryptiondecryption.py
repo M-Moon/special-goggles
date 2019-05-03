@@ -152,7 +152,7 @@ def gen_keys(): # driver for generating keys
 
 ### testing ###
 
-
+"""
 pub_key, priv_key = generate_keypair()
 
 #print(pub_key)
@@ -167,3 +167,4 @@ print()
 dec = decrypt_msg(priv_key, enc)
 
 print(dec)
+"""
