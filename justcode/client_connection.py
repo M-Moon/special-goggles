@@ -31,20 +31,11 @@ class Client_Connection():
         except:
             Client_Connection.listen(self) # create listener
 
-        #if ":" in self.ip: # if it is ipv6
-            #self.connector = socket.socket(socket.AF_INET6, socket.SOCK_STREAM) # creating connector (ipv6)
-            #ip_tuple = (self.ip, int(port), 0, 0)
-        #else: # if it is ipv4
-            #self.connector = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creating connector (ipv4)
-            #ip_tuple = (self.ip, int(port))
-
-        ip_tuple = (self.ip, int(port))
+        ip_tuple = (self.ip, int(port)) # making ip tuple
 
         self.connector = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connector.settimeout(10) # connector timeout to 10 seconds
         self.connector.connect(ip_tuple) # connect function
-        
-        print("connecting")
 
         # sending key
         self.connector.send(str(self.pub_key).encode('UTF-8'))
@@ -52,23 +43,18 @@ class Client_Connection():
         # sending name
         self.connector.send(self.name.encode('UTF-8'))
 
-        #print("Connection established") # confirm connection established
-
     def disconnect(self): # disconnecting by closing both connector and listener sockets
         self.connector.close() # close connector socket
         
         self.listener.close() # close listener socket
         self.connection.close() # close other client connected socket
 
-        #del self.listen_thread
-        #print("Deleted??")
-
     def listen(self): # starting the listening thread
         self.listen_thread = Thread(target=Client_Connection._listen, args=(self,)).start()
 
     def _listen(self):
         ownip = socket.gethostbyname(socket.gethostname())
-        print(ownip, "Own")
+        #print(ownip, "Own")
         
         self.listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creating listener (ipv4)
         self.listener.settimeout(10) # listener timeout to 10 seconds
@@ -84,22 +70,18 @@ class Client_Connection():
 
             # receiving key
             self.other_pub_key = literal_eval(self.connection.recv(DATA_BUFFER).decode())
-            #print(self.other_pub_key)
 
             #receiving name
             self.other_name = self.connection.recv(DATA_BUFFER).decode()
-            #print(self.other_name)
             
             while True:
                 try:
                     data = literal_eval(self.connection.recv(DATA_BUFFER).decode()) # receive data and decode, then eval the string to list
-                    #print(data)
                     if not data:
                         continue
-                    self.incoming_msg = decrypt_msg(self.priv_key, data) # decrypting incoming message
-                    #print(self.incoming_msg)  
+                    self.incoming_msg = decrypt_msg(self.priv_key, data) # decrypting incoming message 
                 except Exception as e:
-                    #print(e, "Yes this one right here officer")
+                    #print(e)
                     pass
 
     def send_message(self, msg): # sending message to other client

@@ -21,7 +21,7 @@ class Client(tk.Frame):
     def __init__(self, parent, width=400, height=500):  # init app
         # creating parent
         tk.Frame.__init__(self, parent) # initialising tkinter Frame from inputting root
-        self.parent = parent # making parent easily accessable
+        self.parent = parent # making parent easily accessible
         
         parent.title("Client-side Window") # naming window logically
 
@@ -65,7 +65,7 @@ class Client(tk.Frame):
 
         # main chat window that can't be edited
         self.messages = tk.Text(self.parent)
-        self.messages.config(state='disabled')
+        self.messages.config(state='disabled')  
         self.messages.grid(row=0, column=0)
 
         # actual scrollbar
@@ -140,7 +140,9 @@ class Client(tk.Frame):
     def establish_connection(self, ip, port):  # attempting to establish connection with other client
         if int(port) < 1024:
             Client.update_message_other(self, "Cannot use port below 1024")
-            pass
+        elif not '.' in ip:
+            Client.update_message_other(self, "Invalid IP given")
+
         else:
             try:
                 self.cnct = Client_Connection(self.user, self.priv_key, self.pub_key) # creating connection object
@@ -160,6 +162,7 @@ class Client(tk.Frame):
             except socket_error as e:  # if connection fails
                 print("Connection failed.")
                 print(e)
+                Client.update_message_other(self, "Connection failed.") # telling user connection failed
 
     def break_connection(self): # function to break connection
         self.cnct.disconnect() # call object's disconnect function
@@ -223,11 +226,13 @@ class Client(tk.Frame):
         e1.grid(row=0, column=1)
 
         def get_entries(self, *args):  # get the entries the user has input
-            ent1 = e1.get()
+            ent1 = str(e1.get())
 
             if len(ent1) > 0:  # making sure something has been input
                 self.user = ent1
                 Client.update_message_other(self, "Username changed.")
+            else:
+                Client.update_message_other(self, "User field empty: Username unchanged")
 
             Client.update_cfg(self)
 
