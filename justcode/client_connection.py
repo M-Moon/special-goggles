@@ -54,7 +54,7 @@ class Client_Connection():
             self.connector.connect(ip_tuple) # connect function
         except socket_error:
             self.connector.close()
-            print("Closed")
+            #print("Closed")
 
         # sending key
         self.connector.send(str(self.pub_key).encode('UTF-8'))
@@ -73,7 +73,7 @@ class Client_Connection():
 
     def _listen(self):
         ownip = Client_Connection.get_ownip(self)
-        print(ownip, "Own")
+        #print(ownip, "Own")
         
         self.listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creating listener (ipv4)
         self.listener.settimeout(10) # listener timeout to 10 seconds
