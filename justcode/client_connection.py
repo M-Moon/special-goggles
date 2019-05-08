@@ -5,6 +5,8 @@ from threading import Thread
 
 from encryptiondecryption import encrypt_msg, decrypt_msg
 
+from socket import error as socket_error
+
 from ast import literal_eval
 
 DATA_BUFFER = 16384
@@ -21,6 +23,18 @@ class Client_Connection():
 
         self.incoming_msg = None # variable for received messages
 
+    def get_ownip(self): # script to reliably get own internal ip
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            # doesn't even have to be reachable
+            s.connect(('10.255.255.255', 1))
+            IP = s.getsockname()[0]
+        except:
+            IP = '127.0.0.1'
+        finally:
+            s.close()
+        return IP
+
     def connect(self, ip, port): # connecting to client
         self.ip = ip
         self.port = port
@@ -35,7 +49,12 @@ class Client_Connection():
 
         self.connector = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connector.settimeout(10) # connector timeout to 10 seconds
-        self.connector.connect(ip_tuple) # connect function
+
+        try:
+            self.connector.connect(ip_tuple) # connect function
+        except socket_error:
+            self.connector.close()
+            print("Closed")
 
         # sending key
         self.connector.send(str(self.pub_key).encode('UTF-8'))
@@ -53,8 +72,8 @@ class Client_Connection():
         self.listen_thread = Thread(target=Client_Connection._listen, args=(self,)).start()
 
     def _listen(self):
-        ownip = socket.gethostbyname(socket.gethostname())
-        #print(ownip, "Own")
+        ownip = Client_Connection.get_ownip(self)
+        print(ownip, "Own")
         
         self.listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # creating listener (ipv4)
         self.listener.settimeout(10) # listener timeout to 10 seconds
@@ -66,23 +85,25 @@ class Client_Connection():
         self.listener.listen(1) # listen for one connection, reject all others if connected
 
         while True:
-            self.connection, address = self.listener.accept() # accept incoming connection
+            try:
+                self.connection, address = self.listener.accept() # accept incoming connection
 
-            # receiving key
-            self.other_pub_key = literal_eval(self.connection.recv(DATA_BUFFER).decode())
+                # receiving key
+                self.other_pub_key = literal_eval(self.connection.recv(DATA_BUFFER).decode())
 
-            #receiving name
-            self.other_name = self.connection.recv(DATA_BUFFER).decode()
+                #receiving name
+                self.other_name = self.connection.recv(DATA_BUFFER).decode()
             
-            while True:
-                try:
+                while True:
                     data = literal_eval(self.connection.recv(DATA_BUFFER).decode()) # receive data and decode, then eval the string to list
                     if not data:
                         continue
                     self.incoming_msg = decrypt_msg(self.priv_key, data) # decrypting incoming message 
-                except Exception as e:
-                    #print(e)
-                    pass
+
+            except Exception as e:
+                #print(e)
+                self.listener.close()
+                break
 
     def send_message(self, msg): # sending message to other client
         encrypted_msg = encrypt_msg(self.other_pub_key, msg) # encrypt msg with received public key
