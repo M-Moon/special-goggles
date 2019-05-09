@@ -138,16 +138,21 @@ class Client(tk.Frame):
         b.pack(pady=5)  # create and pack confirmation button
 
     def establish_connection(self, ip, port):  # attempting to establish connection with other client
+        # validating connection inputs
         if int(port) < 1024:
             Client.update_message_other(self, "Cannot use port below 1024")
         elif not '.' in ip:
             Client.update_message_other(self, "Invalid IP given")
 
         else:
-            try:
+            try: # attempt the connection
                 self.cnct = Client_Connection(self.user, self.priv_key, self.pub_key) # creating connection object
                 self.cnct.connect(ip, port)  # attempting connection with ip and port
-
+            except socket_error as e:  # if connection fails
+                print("Connection failed.")
+                print(e)
+                Client.update_message_other(self, "Connection failed.") # telling user connection failed
+            else: # updating program after successful connection
                 self.connected = True # knowing connection is established
 
                 # confirming connection in textbox
@@ -158,11 +163,6 @@ class Client(tk.Frame):
                 self.menubar.entryconfig(3, state="disabled") # make options unviable
 
                 self.enter_field.configure(state='normal') # make entry box usable
-            
-            except socket_error as e:  # if connection fails
-                print("Connection failed.")
-                print(e)
-                Client.update_message_other(self, "Connection failed.") # telling user connection failed
 
     def break_connection(self): # function to break connection
         self.cnct.disconnect() # call object's disconnect function
@@ -230,11 +230,10 @@ class Client(tk.Frame):
 
             if len(ent1) > 0:  # making sure something has been input
                 self.user = ent1
+                Client.update_cfg(self)
                 Client.update_message_other(self, "Username changed.")
             else:
                 Client.update_message_other(self, "User field empty: Username unchanged")
-
-            Client.update_cfg(self)
 
             e1.delete(0, 'end')  # deleting options window
 

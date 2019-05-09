@@ -68,6 +68,9 @@ class Client_Connection():
         self.listener.close() # close listener socket
         self.connection.close() # close other client connected socket
 
+        self.other_pub_key = None # getting rid of other client's information
+        self.other_name = None
+
     def listen(self): # starting the listening thread
         self.listen_thread = Thread(target=Client_Connection._listen, args=(self,)).start()
 
